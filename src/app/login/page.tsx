@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { loginWithGoogle } from "@/lib/firebase/auth";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Sparkles, Loader2 } from "lucide-react";
@@ -28,9 +28,10 @@ export default function LoginPage() {
         try {
             await loginWithGoogle();
             // Navigation will happen via the useEffect above
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Sign-in error:", err);
-            setError(err.message || "Failed to sign in. Please try again.");
+            const message = err instanceof Error ? err.message : "Failed to sign in. Please try again.";
+            setError(message);
             setSigningIn(false);
         }
     };
