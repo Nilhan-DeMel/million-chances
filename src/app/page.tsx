@@ -6,6 +6,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "motion/react";
 import { Sparkles, ImageIcon, FolderKanban } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -59,22 +60,24 @@ function HomeContent() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1, duration: 0.3 }}
         >
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-indigo-100 rounded-lg">
-                  <ImageIcon className="h-5 w-5 text-indigo-600" />
+          <Link href="/gallery">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer border-none bg-white">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-indigo-100 rounded-lg">
+                    <ImageIcon className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <CardTitle>Gallery</CardTitle>
                 </div>
-                <CardTitle>Gallery</CardTitle>
-              </div>
-              <CardDescription>Browse your work memories</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Coming soon: View and organize your image-clustered work memories
-              </p>
-            </CardContent>
-          </Card>
+                <CardDescription>Browse your work memories</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  View and organize your image-clustered work memories
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
         </motion.div>
 
         <motion.div
@@ -115,7 +118,7 @@ function HomeContent() {
                   Authentication Enabled ✨
                 </h3>
                 <p className="text-sm text-indigo-700">
-                  You're signed in as <span className="font-medium">{user?.email}</span>
+                  You&apos;re signed in as <span className="font-medium">{user?.email}</span>
                 </p>
                 <p className="text-xs text-indigo-600 mt-2">
                   Protected routes are now working. Only authenticated users can access this page.
