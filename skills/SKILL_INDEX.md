@@ -22,6 +22,7 @@ A catalog of all available skill packs for the Million Chances Now app.
 | **CDP Browser (Chrome/Edge)**            | Automation via external browser debugging                            | [skill-browser-cdp-chrome-edge.md](./skill-browser-cdp-chrome-edge.md)                 |
 | **Human Browser Pilot**                  | Manual verification by Nilhan                                        | [skill-browser-human-pilot.md](./skill-browser-human-pilot.md)                         |
 | **Firestore Client CRUD Patterns**       | Frontend patterns for reliable data access                           | [skill-firestore-client-crud.md](./skill-firestore-client-crud.md)                     |
+| **Firebase Storage Image Upload**        | Standardized image upload with progress tracking                     | [skill-firebase-storage-image-upload.md](./skill-firebase-storage-image-upload.md)     |
 
 ## Skill Pack Quick Reference
 
@@ -58,6 +59,7 @@ A catalog of all available skill packs for the Million Chances Now app.
 - CDP Browser Automation (External)
 - Human Browser Pilot (Manual)
 - Firestore Client CRUD (Patterns)
+- Firebase Storage Image Upload (Standardized)
 
 ## Update Process
 
