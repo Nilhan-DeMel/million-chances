@@ -1,3 +1,8 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
 @import "@radix-ui/colors/orange.css";
 @import "@radix-ui/colors/orange-dark.css";
 @import "@radix-ui/colors/tomato.css";
