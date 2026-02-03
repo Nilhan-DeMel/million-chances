@@ -4,7 +4,7 @@ import { motion } from "motion/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
 import { CheckCircle, Rocket, Sparkles } from "lucide-react"
-import { app } from "@/lib/firebase"
+import { app } from "@/lib/firebase/client"
 
 export default function SkillsSmokePage() {
     // Verify Firebase is initialized
@@ -131,7 +131,7 @@ export default function SkillsSmokePage() {
                                         </span>
                                     </div>
                                     <div className="text-xs text-muted-foreground">
-                                        Using demo/placeholder config
+                                        Firebase config loaded: {app.options.projectId}
                                     </div>
                                 </div>
                             </CardContent>
