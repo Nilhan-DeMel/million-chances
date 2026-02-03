@@ -31,9 +31,11 @@ When assigned a task, AG will:
 ## Quality Gates
 
 To ensure world-class quality, we integrate:
+
 - **E2E Testing**: Every PR is checked via Playwright for functional correctness.
 - **Accessibility (a11y)**: Automatic Axe scans ensure we meet WCAG standards.
 - **Rules Testing**: Security rules are verified locally before deployment.
+- **Repo Sync**: Standardized 3-copy sync (Local ↔ GitHub ↔ Firebase) for deterministic deployments.
 
 ## Skill Index
 
