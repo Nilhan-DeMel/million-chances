@@ -14,11 +14,17 @@ A catalog of all available skill packs for the Million Chances Now app.
 | **TanStack Query** | Fetching, caching, and syncing server/Firebase data | [skill-tanstack-query.md](./skill-tanstack-query.md) |
 | **Forms (React Hook Form + Zod)** | Building forms with validation | [skill-forms-react-hook-form-zod.md](./skill-forms-react-hook-form-zod.md) |
 | **Firebase + Next.js Deploy** | Deploying Next.js app to Firebase Hosting | [skill-firebase-nextjs-deploy.md](./skill-firebase-nextjs-deploy.md) |
+| **Color System (Radix Colors)** | Implementing warm accents (Orange/Tomato) and accessible grays | [skill-color-system-radix-colors.md](./skill-color-system-radix-colors.md) |
+| **Typography (Next.js font)** | Premium typography with Outfit font and zero layout shift | [skill-typography-next-font.md](./skill-typography-next-font.md) |
+| **E2E Testing (Playwright)** | Cross-browser testing for critical user paths | [skill-e2e-playwright.md](./skill-e2e-playwright.md) |
+| **Accessibility (Axe + Playwright)**| Automated a11y scans based on WCAG standards | [skill-a11y-axe-playwright.md](./skill-a11y-axe-playwright.md) |
 
 ## Skill Pack Quick Reference
 
 ### UI & Design
 - shadcn/ui + Radix + Tailwind
+- Radix Colors (Warm System)
+- Typography (Outfit)
 
 ### Interactions
 - Motion & Animations
@@ -34,8 +40,10 @@ A catalog of all available skill packs for the Million Chances Now app.
 ### Forms & Validation
 - React Hook Form + Zod
 
-### Deployment
+### Deployment & Quality
 - Firebase + Next.js Deploy
+- E2E Testing (Playwright)
+- Accessibility Scans (Axe)
 
 ## Update Process
 
