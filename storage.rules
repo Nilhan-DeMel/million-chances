@@ -9,8 +9,8 @@ service firebase.storage {
 
     // top-level images and message attachments
     match /imageCards/{cardId}/{allPaths=**} {
-      // Allow read, create, and update for authenticated users
-      allow read, create, update: if request.auth != null;
+      // Allow read and create for authenticated users
+      allow read, create: if request.auth != null;
       
       // Explicitly disallow delete (though it's denied by default if not allowed)
       allow delete: if false;
