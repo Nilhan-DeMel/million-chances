@@ -37,6 +37,13 @@ To ensure world-class quality, we integrate:
 - **Rules Testing**: Security rules are verified locally before deployment.
 - **Repo Sync**: Standardized 3-copy sync (Local ↔ GitHub ↔ Firebase) for deterministic deployments.
 
+## ⚠️ Browser Subagent Disabled
+
+The internal `$HOME`-dependent browser subagent is **DISABLED**. All browser verification must use:
+
+1. **CDP Browser**: Automation via external Chrome/Edge (Remote Debugging).
+2. **Human Pilot**: Manual verification steps by the user.
+
 ## Skill Index
 
 See [SKILL_INDEX.md](./SKILL_INDEX.md) for the complete catalog of available skills.

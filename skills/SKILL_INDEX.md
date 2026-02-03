@@ -19,6 +19,8 @@ A catalog of all available skill packs for the Million Chances Now app.
 | **E2E Testing (Playwright)**             | Cross-browser testing for critical user paths                        | [skill-e2e-playwright.md](./skill-e2e-playwright.md)                                   |
 | **Accessibility (Axe + Playwright)**     | Automated a11y scans based on WCAG standards                         | [skill-a11y-axe-playwright.md](./skill-a11y-axe-playwright.md)                         |
 | **Repo Sync & Deploy**                   | Standardizing Local ↔ GitHub ↔ Firebase sync                         | [skill-repo-sync-deploy.md](./skill-repo-sync-deploy.md)                               |
+| **CDP Browser (Chrome/Edge)**            | Automation via external browser debugging                            | [skill-browser-cdp-chrome-edge.md](./skill-browser-cdp-chrome-edge.md)                 |
+| **Human Browser Pilot**                  | Manual verification by Nilhan                                        | [skill-browser-human-pilot.md](./skill-browser-human-pilot.md)                         |
 
 ## Skill Pack Quick Reference
 
@@ -52,6 +54,8 @@ A catalog of all available skill packs for the Million Chances Now app.
 - E2E Testing (Playwright)
 - Accessibility Scans (Axe)
 - Repo Sync & Deploy (Deterministic sync)
+- CDP Browser Automation (External)
+- Human Browser Pilot (Manual)
 
 ## Update Process
 
