@@ -3,15 +3,33 @@
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { UserNav } from "@/components/auth/UserNav";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useImageCardsList, useCreateImageCardStub } from "@/lib/queries/useImageCards";
+import { 
+  useImageCardsList, 
+  useCreateImageCardStub, 
+  useUploadImageForCard, 
+  useImageCardImageUrl 
+} from "@/lib/queries/useImageCards";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
 import { motion, AnimatePresence } from "motion/react";
-import { Sparkles, ImageIcon, Plus, Search, Clock, MessageSquare, AlertCircle } from "lucide-react";
-import { useState } from "react";
+import { 
+  Sparkles, 
+  ImageIcon, 
+  Plus, 
+  Search, 
+  Clock, 
+  MessageSquare, 
+  AlertCircle,
+  Upload,
+  Loader2
+} from "lucide-react";
+import { useState, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { ImageCard } from "@/lib/firestore/imageCards";
 
 export default function GalleryPage() {
   return (
@@ -84,7 +102,7 @@ function GalleryContent() {
           >
             {createStubMutation.isPending ? (
               <span className="flex items-center gap-2">
-                <span className="h-4 w-4 animate-spin border-2 border-current border-t-transparent rounded-full" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Creating...
               </span>
             ) : (
@@ -120,42 +138,7 @@ function GalleryContent() {
         ) : filteredCards.length > 0 ? (
           <AnimatePresence mode="popLayout">
             {filteredCards.map((card, index) => (
-              <motion.div
-                key={card.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.2, delay: index * 0.05 }}
-              >
-                <Card className="group overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow cursor-pointer bg-white">
-                  <div className="aspect-video bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors relative">
-                    <ImageIcon className="h-10 w-10 text-indigo-200 group-hover:text-indigo-300 transition-colors" />
-                    <div className="absolute top-2 right-2 px-2 py-1 bg-white/80 backdrop-blur-sm rounded text-[10px] font-medium text-indigo-600 border border-indigo-100 opacity-0 group-hover:opacity-100 transition-opacity">
-                      STUB
-                    </div>
-                  </div>
-                  <CardHeader className="p-4">
-                    <div className="space-y-1">
-                      <p className="font-medium line-clamp-1">
-                        {card.notesText || "No notes yet"}
-                      </p>
-                      <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="h-3 w-3" />
-                          <span>
-                            {card.lastMessageAt?.toDate()?.toLocaleDateString()}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <MessageSquare className="h-3 w-3" />
-                          <span>{card.messageCount}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-              </motion.div>
+              <GalleryCard key={card.id} card={card} index={index} />
             ))}
           </AnimatePresence>
         ) : (
@@ -180,5 +163,122 @@ function GalleryContent() {
         )}
       </div>
     </div>
+  );
+}
+
+function GalleryCard({ card, index }: { card: ImageCard; index: number }) {
+  const { user } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  
+  const { data: imageUrl, isLoading: isImageLoading } = useImageCardImageUrl(card.storagePath);
+  const uploadMutation = useUploadImageForCard();
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    try {
+      await uploadMutation.mutateAsync({
+        cardId: card.id,
+        file,
+        user,
+        onProgress: (progress) => setUploadProgress(progress),
+      });
+    } catch (error) {
+      console.error("Upload error:", error);
+    } finally {
+      setUploadProgress(null);
+    }
+  };
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.2, delay: index * 0.05 }}
+    >
+      <Card className="group overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow bg-white flex flex-col h-full">
+        <div className="aspect-video bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors relative overflow-hidden">
+          {card.storagePath ? (
+            <>
+              {isImageLoading || !imageUrl ? (
+                <Skeleton className="w-full h-full" />
+              ) : (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="relative w-full h-full"
+                >
+                  <Image
+                    src={imageUrl}
+                    alt={card.notesText || "Image card"}
+                    fill
+                    className="object-cover transition-transform group-hover:scale-105"
+                  />
+                </motion.div>
+              )}
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-3 p-4 w-full h-full justify-center">
+              {uploadProgress !== null ? (
+                <div className="w-full px-4 space-y-2">
+                  <Progress value={uploadProgress} className="h-2 w-full bg-indigo-100" />
+                  <p className="text-[10px] text-center font-medium text-indigo-600 animate-pulse">
+                    Uploading... {Math.round(uploadProgress)}%
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <ImageIcon className="h-10 w-10 text-indigo-200 group-hover:text-indigo-300 transition-colors" />
+                  <Button 
+                    variant="secondary" 
+                    size="sm"
+                    className="bg-white/90 hover:bg-white text-indigo-600 border border-indigo-100"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadMutation.isPending}
+                  >
+                    <Upload className="h-3.5 w-3.5 mr-2" />
+                    Upload Image
+                  </Button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                </>
+              )}
+            </div>
+          )}
+          
+          <div className="absolute top-2 right-2 px-2 py-1 bg-white/80 backdrop-blur-sm rounded text-[10px] font-medium text-indigo-600 border border-indigo-100 opacity-0 group-hover:opacity-100 transition-opacity">
+            {card.storagePath ? "IMAGE" : "STUB"}
+          </div>
+        </div>
+        <CardHeader className="p-4 flex-grow">
+          <div className="space-y-1">
+            <p className="font-medium line-clamp-1">
+              {card.notesText || "No notes yet"}
+            </p>
+            <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
+              <div className="flex items-center gap-1.5">
+                <Clock className="h-3 w-3" />
+                <span>
+                  {card.lastMessageAt?.toDate()?.toLocaleDateString()}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <MessageSquare className="h-3 w-3" />
+                <span>{card.messageCount}</span>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+    </motion.div>
   );
 }
