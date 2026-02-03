@@ -23,6 +23,7 @@ A catalog of all available skill packs for the Million Chances Now app.
 | **Human Browser Pilot**                  | Manual verification by Nilhan                                        | [skill-browser-human-pilot.md](./skill-browser-human-pilot.md)                         |
 | **Firestore Client CRUD Patterns**       | Frontend patterns for reliable data access                           | [skill-firestore-client-crud.md](./skill-firestore-client-crud.md)                     |
 | **Firebase Storage Image Upload**        | Standardized image upload with progress tracking                     | [skill-firebase-storage-image-upload.md](./skill-firebase-storage-image-upload.md)     |
+| **Firestore Realtime Listeners**         | Pattern for onSnapshot usage and cleanup                             | [skill-firestore-realtime-listeners.md](./skill-firestore-realtime-listeners.md)       |
 
 ## Skill Pack Quick Reference
 
@@ -60,6 +61,7 @@ A catalog of all available skill packs for the Million Chances Now app.
 - Human Browser Pilot (Manual)
 - Firestore Client CRUD (Patterns)
 - Firebase Storage Image Upload (Standardized)
+- Firestore Realtime Listeners (onSnapshot)
 
 ## Update Process
 
