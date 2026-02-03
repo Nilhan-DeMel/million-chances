@@ -1,0 +1,19 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Default: deny all
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    // top-level images and message attachments
+    match /imageCards/{cardId}/{allPaths=**} {
+      // Allow read, create, and update for authenticated users
+      allow read, create, update: if request.auth != null;
+      
+      // Explicitly disallow delete (though it's denied by default if not allowed)
+      allow delete: if false;
+    }
+  }
+}
