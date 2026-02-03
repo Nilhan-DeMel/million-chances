@@ -23,15 +23,18 @@ export const loginWithGoogle = async (): Promise<User> => {
     try {
         const result = await signInWithPopup(auth, googleProvider);
         return result.user;
-    } catch (error: any) {
+    } catch (error: unknown) {
         // Handle specific error codes
-        if (error.code === 'auth/popup-blocked') {
-            throw new Error('Popup was blocked by the browser. Please allow popups for this site.');
-        } else if (error.code === 'auth/popup-closed-by-user') {
-            throw new Error('Sign-in was cancelled.');
-        } else if (error.code === 'auth/cancelled-popup-request') {
-            // Multiple popups attempted, this is expected behavior
-            throw new Error('Another sign-in is in progress.');
+        if (error && typeof error === 'object' && 'code' in error) {
+            const err = error as { code: string };
+            if (err.code === 'auth/popup-blocked') {
+                throw new Error('Popup was blocked by the browser. Please allow popups for this site.');
+            } else if (err.code === 'auth/popup-closed-by-user') {
+                throw new Error('Sign-in was cancelled.');
+            } else if (err.code === 'auth/cancelled-popup-request') {
+                // Multiple popups attempted, this is expected behavior
+                throw new Error('Another sign-in is in progress.');
+            }
         }
         throw error;
     }
