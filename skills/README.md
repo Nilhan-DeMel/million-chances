@@ -28,6 +28,13 @@ When assigned a task, AG will:
 - **Verifiable**: Each skill includes proof-of-work checks
 - **Documented decisions**: "Why we chose X over Y" is explicit
 
+## Quality Gates
+
+To ensure world-class quality, we integrate:
+- **E2E Testing**: Every PR is checked via Playwright for functional correctness.
+- **Accessibility (a11y)**: Automatic Axe scans ensure we meet WCAG standards.
+- **Rules Testing**: Security rules are verified locally before deployment.
+
 ## Skill Index
 
 See [SKILL_INDEX.md](./SKILL_INDEX.md) for the complete catalog of available skills.
