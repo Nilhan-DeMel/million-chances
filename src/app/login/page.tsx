@@ -38,9 +38,9 @@ export default function LoginPage() {
     // Show loading state while checking auth
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+            <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50">
                 <Loader2 className="h-8 w-8 animate-spin text-indigo-600" aria-label="Loading" />
-            </div>
+            </main>
         );
     }
 
@@ -50,7 +50,7 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4">
+        <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -69,9 +69,9 @@ export default function LoginPage() {
                         >
                             <Sparkles className="h-8 w-8 text-white" />
                         </motion.div>
-                        <CardTitle className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent leading-none">
                             Million Chances
-                        </CardTitle>
+                        </h1>
                         <CardDescription className="text-base">
                             Sign in to continue to your workspace
                         </CardDescription>
@@ -140,6 +140,6 @@ export default function LoginPage() {
                     Image-clustered work memory app
                 </motion.p>
             </motion.div>
-        </div>
+        </main>
     );
 }
