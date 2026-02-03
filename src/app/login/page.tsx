@@ -39,7 +39,7 @@ export default function LoginPage() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" aria-label="Loading" />
             </div>
         );
     }
@@ -64,6 +64,8 @@ export default function LoginPage() {
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                             className="mx-auto w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4"
+                            role="img"
+                            aria-label="Million Chances logo"
                         >
                             <Sparkles className="h-8 w-8 text-white" />
                         </motion.div>
@@ -80,15 +82,16 @@ export default function LoginPage() {
                             disabled={signingIn}
                             className="w-full h-12 text-base font-medium bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-200 hover:border-gray-300 transition-all"
                             variant="outline"
+                            aria-label="Continue with Google"
                         >
                             {signingIn ? (
                                 <>
-                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden="true" />
                                     Signing in...
                                 </>
                             ) : (
                                 <>
-                                    <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
+                                    <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
                                         <path
                                             fill="#4285F4"
                                             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -116,6 +119,7 @@ export default function LoginPage() {
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700"
+                                role="alert"
                             >
                                 {error}
                             </motion.div>
