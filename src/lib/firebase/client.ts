@@ -10,7 +10,7 @@ const firebaseConfig = {
 };
 
 // Guard: Warn if environment variables are missing (development only)
-if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+if (typeof window !== "undefined") {
     const requiredEnvVars = [
         "NEXT_PUBLIC_FIREBASE_API_KEY",
         "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
@@ -23,9 +23,19 @@ if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
     const missingEnvVars = requiredEnvVars.filter((key) => !process.env[key]);
 
     if (missingEnvVars.length > 0) {
-        console.warn(
-            `⚠️ Missing Firebase environment variables: ${missingEnvVars.join(", ")}. Check your .env.local file.`
-        );
+        const errorMsg = `⚠️ Missing Firebase environment variables: ${missingEnvVars.join(", ")}. Check your .env.local file.`;
+        
+        if (process.env.NODE_ENV === "production") {
+            // In production, some keys might be missing if they are optional, 
+            // but usually we want at least API_KEY and PROJECT_ID.
+            const criticalKeys = ["NEXT_PUBLIC_FIREBASE_API_KEY", "NEXT_PUBLIC_FIREBASE_PROJECT_ID"];
+            const missingCritical = criticalKeys.filter(key => !process.env[key]);
+            if (missingCritical.length > 0) {
+                throw new Error(`CRITICAL: Missing Firebase environment variables: ${missingCritical.join(", ")}`);
+            }
+        } else if (process.env.NODE_ENV === "development") {
+            console.warn(errorMsg);
+        }
     }
 }
 
