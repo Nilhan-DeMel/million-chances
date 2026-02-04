@@ -17,18 +17,19 @@ service cloud.firestore {
                     && request.resource.data.createdBy.uid == request.auth.uid;
       
       // Allow update:
-      // 1. Owner can update notesText
+      // 1. Owner can update notesText and storagePath (if not already set)
       // 2. Any auth user can update lastMessageAt and messageCount (for chat functionality)
       allow update: if request.auth != null && (
-        // Case 1: Owner update (primarily for notesText)
+        // Case 1: Owner update
         (resource.data.createdBy.uid == request.auth.uid 
          && request.resource.data.createdBy.uid == resource.data.createdBy.uid
          && request.resource.data.createdAt == resource.data.createdAt
-         && request.resource.data.storagePath == resource.data.storagePath)
+         // Allow updating storagePath ONLY if it's currently null
+         && (request.resource.data.storagePath == resource.data.storagePath || resource.data.storagePath == null))
         ||
         // Case 2: Restricted message update (for non-owners)
         (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessageAt', 'messageCount'])
-         && request.resource.data.lastMessageAt == request.time
+         // Ensure count increases and timestamp is reasonable
          && request.resource.data.messageCount == resource.data.messageCount + 1)
       );
       

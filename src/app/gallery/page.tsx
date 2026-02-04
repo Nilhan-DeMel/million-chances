@@ -182,6 +182,7 @@ function GalleryCard({ card, index }: { card: ImageCard; index: number }) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   
   const { data: imageUrl, isLoading: isImageLoading } = useImageCardImageUrl(card.storagePath);
   const uploadMutation = useUploadImageForCard();
@@ -191,14 +192,16 @@ function GalleryCard({ card, index }: { card: ImageCard; index: number }) {
     if (!file || !user) return;
 
     try {
+      setUploadError(null);
       await uploadMutation.mutateAsync({
         cardId: card.id,
         file,
         user,
         onProgress: (progress) => setUploadProgress(progress),
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Upload error:", error);
+      setUploadError(error?.message || "Upload failed");
     } finally {
       setUploadProgress(null);
     }
@@ -249,6 +252,25 @@ function GalleryCard({ card, index }: { card: ImageCard; index: number }) {
                   <p className="text-[10px] text-center font-medium text-indigo-600 animate-pulse">
                     Uploading... {Math.round(uploadProgress)}%
                   </p>
+                </div>
+              ) : uploadError ? (
+                <div className="flex flex-col items-center gap-2 p-4 text-center">
+                  <AlertCircle className="h-8 w-8 text-destructive" />
+                  <p className="text-[10px] font-medium text-destructive">
+                    {uploadError}
+                  </p>
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    className="h-auto p-0 text-[10px]"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setUploadError(null);
+                      fileInputRef.current?.click();
+                    }}
+                  >
+                    Try again
+                  </Button>
                 </div>
               ) : (
                 <>
