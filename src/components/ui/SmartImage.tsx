@@ -7,13 +7,20 @@ interface SmartImageProps {
   src: string;
   alt: string;
   fill?: boolean;
+  sizes?: string;
   className?: string;
-  onLoadingComplete?: () => void;
+  onLoad?: () => void;
 }
 
-export function SmartImage({ src, alt, fill, className, onLoadingComplete }: SmartImageProps) {
+export function SmartImage({ 
+  src, 
+  alt, 
+  fill, 
+  sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw",
+  className, 
+  onLoad 
+}: SmartImageProps) {
   const [error, setError] = useState(false);
-  const isDev = process.env.NODE_ENV === "development";
 
   if (error) {
     return (
@@ -23,13 +30,8 @@ export function SmartImage({ src, alt, fill, className, onLoadingComplete }: Sma
           src={src} 
           alt={alt} 
           className={`${className} ${fill ? 'absolute inset-0 w-full h-full object-cover' : ''}`}
-          onLoad={() => onLoadingComplete?.()}
+          onLoad={() => onLoad?.()}
         />
-        {isDev && (
-          <div className="absolute top-1 left-1 bg-yellow-500 text-[8px] text-white px-1 rounded font-bold shadow-sm z-10">
-            IMG FALLBACK
-          </div>
-        )}
       </div>
     );
   }
@@ -40,18 +42,14 @@ export function SmartImage({ src, alt, fill, className, onLoadingComplete }: Sma
         src={src}
         alt={alt}
         fill={fill}
+        sizes={fill ? sizes : undefined}
         className={className}
         onError={() => {
           console.warn(`SmartImage: Next/Image failed for ${src}. Falling back to <img>.`);
           setError(true);
         }}
-        onLoadingComplete={() => onLoadingComplete?.()}
+        onLoad={() => onLoad?.()}
       />
-      {isDev && (
-        <div className="absolute top-1 left-1 bg-green-500 text-[8px] text-white px-1 rounded font-bold shadow-sm z-10">
-          NEXT/IMAGE
-        </div>
-      )}
     </div>
   );
 }

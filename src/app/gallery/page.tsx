@@ -9,7 +9,7 @@ import {
   useUploadImageForCard, 
   useImageCardImageUrl 
 } from "@/lib/queries/useImageCards";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -27,7 +27,7 @@ import {
   Upload,
   Loader2
 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { SmartImage } from "@/components/ui/SmartImage";
 import { ImageCard } from "@/lib/firestore/imageCards";
@@ -64,25 +64,66 @@ function GalleryContent() {
   const { user } = useAuth();
   const { data: cards, isLoading, isError } = useImageCardsList();
   const createStubMutation = useCreateImageCardStub();
+  const uploadMutation = useUploadImageForCard();
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // ROBUST PATTERN: Single file input at page level
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeUploadCardId, setActiveUploadCardId] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [uploadError, setUploadError] = useState<{ cardId: string; message: string } | null>(null);
 
   const filteredCards = cards?.filter(card => 
     (card.notesText || "No notes yet").toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
   const handleCreateStub = () => {
-    console.log("handleCreateStub called", { user, isPending: createStubMutation.isPending });
     if (user) {
-      createStubMutation.mutate(user, {
-        onError: (error) => {
-          console.error("Failed to create stub:", error);
-        },
-        onSuccess: (cardId) => {
-          console.log("Successfully created card:", cardId);
-        }
+      createStubMutation.mutate(user);
+    }
+  };
+
+  // Trigger file picker for a specific card
+  const handleUploadClick = useCallback((cardId: string) => {
+    setActiveUploadCardId(cardId);
+    setUploadError(null);
+    // Small delay to ensure state is set before click
+    setTimeout(() => {
+      fileInputRef.current?.click();
+    }, 0);
+  }, []);
+
+  // Handle file selection
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    
+    // Reset input value so same file can be selected again
+    e.target.value = "";
+    
+    if (!file || !activeUploadCardId || !user) {
+      setActiveUploadCardId(null);
+      return;
+    }
+
+    const cardId = activeUploadCardId;
+    
+    try {
+      setUploadProgress(0);
+      
+      await uploadMutation.mutateAsync({
+        cardId,
+        file,
+        user,
+        onProgress: (progress) => setUploadProgress(progress),
       });
-    } else {
-      console.error("No user found");
+      
+      setUploadProgress(null);
+      setActiveUploadCardId(null);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Upload failed";
+      setUploadError({ cardId, message });
+      setUploadProgress(null);
+      setActiveUploadCardId(null);
     }
   };
 
@@ -128,12 +169,21 @@ function GalleryContent() {
 
       {isError && (
         <Card className="border-destructive bg-destructive/5">
-          <CardContent className="pt-6 flex items-center gap-3 text-destructive">
+          <div className="pt-6 px-6 pb-6 flex items-center gap-3 text-destructive">
             <AlertCircle className="h-5 w-5" />
             <p>Failed to load images. Please check your connection.</p>
-          </CardContent>
+          </div>
         </Card>
       )}
+
+      {/* SINGLE FILE INPUT - Always mounted at page level */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept="image/*"
+        onChange={handleFileChange}
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {isLoading ? (
@@ -149,7 +199,16 @@ function GalleryContent() {
         ) : filteredCards.length > 0 ? (
           <AnimatePresence mode="popLayout">
             {filteredCards.map((card, index) => (
-              <GalleryCard key={card.id} card={card} index={index} />
+              <GalleryCard 
+                key={card.id} 
+                card={card} 
+                index={index}
+                onUploadClick={handleUploadClick}
+                isUploading={activeUploadCardId === card.id && uploadProgress !== null}
+                uploadProgress={activeUploadCardId === card.id ? uploadProgress : null}
+                uploadError={uploadError?.cardId === card.id ? uploadError.message : null}
+                onClearError={() => setUploadError(null)}
+              />
             ))}
           </AnimatePresence>
         ) : (
@@ -177,35 +236,27 @@ function GalleryContent() {
   );
 }
 
-function GalleryCard({ card, index }: { card: ImageCard; index: number }) {
-  const { user } = useAuth();
+interface GalleryCardProps {
+  card: ImageCard;
+  index: number;
+  onUploadClick: (cardId: string) => void;
+  isUploading: boolean;
+  uploadProgress: number | null;
+  uploadError: string | null;
+  onClearError: () => void;
+}
+
+function GalleryCard({ 
+  card, 
+  index, 
+  onUploadClick, 
+  isUploading, 
+  uploadProgress, 
+  uploadError,
+  onClearError 
+}: GalleryCardProps) {
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  
   const { data: imageUrl, isLoading: isImageLoading } = useImageCardImageUrl(card.storagePath);
-  const uploadMutation = useUploadImageForCard();
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-
-    try {
-      setUploadError(null);
-      await uploadMutation.mutateAsync({
-        cardId: card.id,
-        file,
-        user,
-        onProgress: (progress) => setUploadProgress(progress),
-      });
-    } catch (error: any) {
-      console.error("Upload error:", error);
-      setUploadError(error?.message || "Upload failed");
-    } finally {
-      setUploadProgress(null);
-    }
-  };
 
   const handleCardClick = () => {
     router.push(`/cards/${card.id}`);
@@ -246,7 +297,7 @@ function GalleryCard({ card, index }: { card: ImageCard; index: number }) {
             </>
           ) : (
             <div className="flex flex-col items-center gap-3 p-4 w-full h-full justify-center">
-              {uploadProgress !== null ? (
+              {isUploading && uploadProgress !== null ? (
                 <div className="w-full px-4 space-y-2">
                   <Progress value={uploadProgress} className="h-2 w-full bg-indigo-100" />
                   <p className="text-[10px] text-center font-medium text-indigo-600 animate-pulse">
@@ -265,8 +316,8 @@ function GalleryCard({ card, index }: { card: ImageCard; index: number }) {
                     className="h-auto p-0 text-[10px]"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setUploadError(null);
-                      fileInputRef.current?.click();
+                      onClearError();
+                      onUploadClick(card.id);
                     }}
                   >
                     Try again
@@ -276,25 +327,19 @@ function GalleryCard({ card, index }: { card: ImageCard; index: number }) {
                 <>
                   <ImageIcon className="h-10 w-10 text-indigo-200 group-hover:text-indigo-300 transition-colors" />
                   <Button 
+                    type="button"
                     variant="secondary" 
                     size="sm"
                     className="bg-white/90 hover:bg-white text-indigo-600 border border-indigo-100"
                     onClick={(e) => {
                       e.stopPropagation();
-                      fileInputRef.current?.click();
+                      e.preventDefault();
+                      onUploadClick(card.id);
                     }}
-                    disabled={uploadMutation.isPending}
                   >
                     <Upload className="h-3.5 w-3.5 mr-2" />
                     Upload Image
                   </Button>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                  />
                 </>
               )}
             </div>
