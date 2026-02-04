@@ -16,10 +16,21 @@ service cloud.firestore {
       allow create: if request.auth != null 
                     && request.resource.data.createdBy.uid == request.auth.uid;
       
-      // Allow update only if requester is owner AND createdBy.uid remains same
-      allow update: if request.auth != null 
-                    && resource.data.createdBy.uid == request.auth.uid
-                    && request.resource.data.createdBy.uid == resource.data.createdBy.uid;
+      // Allow update:
+      // 1. Owner can update notesText
+      // 2. Any auth user can update lastMessageAt and messageCount (for chat functionality)
+      allow update: if request.auth != null && (
+        // Case 1: Owner update (primarily for notesText)
+        (resource.data.createdBy.uid == request.auth.uid 
+         && request.resource.data.createdBy.uid == resource.data.createdBy.uid
+         && request.resource.data.createdAt == resource.data.createdAt
+         && request.resource.data.storagePath == resource.data.storagePath)
+        ||
+        // Case 2: Restricted message update (for non-owners)
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessageAt', 'messageCount'])
+         && request.resource.data.lastMessageAt == request.time
+         && request.resource.data.messageCount == resource.data.messageCount + 1)
+      );
       
       // Disallow delete
       allow delete: if false;
@@ -29,9 +40,10 @@ service cloud.firestore {
         // Allow read/list for authenticated users
         allow read, list: if request.auth != null;
         
-        // Allow create if author.uid matches requester
+        // Allow create if author.uid matches requester AND time is server timestamp
         allow create: if request.auth != null 
-                      && request.resource.data.author.uid == request.auth.uid;
+                      && request.resource.data.author.uid == request.auth.uid
+                      && request.resource.data.createdAt == request.time;
         
         // Disallow update/delete
         allow update, delete: if false;

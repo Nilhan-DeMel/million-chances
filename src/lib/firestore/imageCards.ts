@@ -3,6 +3,7 @@ import {
   CollectionReference,
   DocumentData,
   getDocs,
+  getDoc,
   query,
   orderBy,
   addDoc,
@@ -11,6 +12,7 @@ import {
   getFirestore,
   doc,
   runTransaction,
+  onSnapshot,
 } from "firebase/firestore";
 import { app } from "../firebase/client";
 import { User } from "firebase/auth";
@@ -35,8 +37,37 @@ export interface ImageCard {
 export const imageCardsCollectionRef = () =>
   collection(db, "imageCards") as CollectionReference<ImageCard, DocumentData>;
 
+export const getImageCard = async (cardId: string): Promise<ImageCard | null> => {
+  const docRef = doc(db, "imageCards", cardId);
+  const snapshot = await getDoc(docRef);
+  
+  if (!snapshot.exists()) return null;
+  
+  return {
+    ...snapshot.data(),
+    id: snapshot.id,
+  } as ImageCard;
+};
+
+export const listenImageCard = (
+  cardId: string,
+  onUpdate: (card: ImageCard | null) => void
+) => {
+  const docRef = doc(db, "imageCards", cardId);
+  return onSnapshot(docRef, (snapshot) => {
+    if (!snapshot.exists()) {
+      onUpdate(null);
+    } else {
+      onUpdate({
+        ...snapshot.data(),
+        id: snapshot.id,
+      } as ImageCard);
+    }
+  });
+};
+
 export const listImageCards = async (): Promise<ImageCard[]> => {
-  const q = query(imageCardsCollectionRef(), orderBy("lastMessageAt", "asc"));
+  const q = query(imageCardsCollectionRef(), orderBy("lastMessageAt", "desc"));
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => ({
     ...doc.data(),
@@ -90,6 +121,32 @@ export const setImageCardImageOnce = async (
     transaction.update(cardDocRef, {
       storagePath,
       lastMessageAt: serverTimestamp(),
+    });
+  });
+};
+
+export const updateImageCardNotes = async (
+  cardId: string,
+  user: User,
+  notesText: string
+): Promise<void> => {
+  const cardDocRef = doc(db, "imageCards", cardId);
+
+  await runTransaction(db, async (transaction) => {
+    const cardDoc = await transaction.get(cardDocRef);
+    if (!cardDoc.exists()) {
+      throw new Error("Card does not exist");
+    }
+
+    const cardData = cardDoc.data() as ImageCard;
+
+    // OWNER-ONLY edit for notesText
+    if (cardData.createdBy.uid !== user.uid) {
+      throw new Error("Unauthorized: Only the owner can edit notes");
+    }
+
+    transaction.update(cardDocRef, {
+      notesText,
     });
   });
 };

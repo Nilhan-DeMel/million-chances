@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, User } from "@/lib/firebase/auth";
 import { auth } from "@/lib/firebase/auth";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 
 interface AuthContextType {
     user: User | null;
@@ -29,7 +30,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <AuthContext.Provider value={{ user, loading }}>
-            {children}
+            <QueryProvider>
+                {children}
+            </QueryProvider>
         </AuthContext.Provider>
     );
 }
