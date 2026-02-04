@@ -47,15 +47,20 @@ export const useUploadImageForCard = () => {
       user: User;
       onProgress?: (progress: number) => void;
     }) => {
+      console.log("[UPLOAD] Step 1: Starting upload to Storage for cardId:", cardId);
       // 1. Upload to Storage
       const { storagePath } = await uploadImageForCard({ cardId, file, user, onProgress });
+      console.log("[UPLOAD] Step 2: Storage upload complete. Path:", storagePath);
       
       // 2. Update Firestore
+      console.log("[UPLOAD] Step 3: Updating Firestore with storagePath...");
       await setImageCardImageOnce(cardId, user, storagePath);
+      console.log("[UPLOAD] Step 4: Firestore update SUCCESSFUL");
       
       return storagePath;
     },
     onSuccess: () => {
+      console.log("[UPLOAD] Step 5: Invalidating queries to refresh gallery...");
       queryClient.invalidateQueries({ queryKey: IMAGE_CARDS_QUERY_KEY });
     },
   });
