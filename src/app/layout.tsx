@@ -19,8 +19,25 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://million-chances.vercel.app"),
   title: "Million Chances - Work Memory App",
   description: "Image-clustered work memory app",
+  openGraph: {
+    title: "Million Chances",
+    description: "Image-clustered work memory app",
+    url: "https://million-chances.vercel.app",
+    siteName: "Million Chances",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Million Chances Preview",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
