@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "firebasestorage.googleapis.com",
         port: "",
-        pathname: "/**", // Loosened for debugging
+        pathname: "/**",
       },
       {
         protocol: "https",
