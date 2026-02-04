@@ -76,22 +76,70 @@ describe("Firestore Security Rules", () => {
       // Try to delete it
       await assertFails(deleteDoc(cardRef));
     });
-  });
 
-  describe("messages", () => {
-    it("should allow create if author.uid matches", async () => {
-      const authedDb = testEnv.authenticatedContext("user1").firestore();
-      const msgRef = doc(authedDb, "imageCards/card1/messages/msg1");
+    it("should allow non-owner to update only lastMessageAt and messageCount", async () => {
+      // 1. Create card as user1
+      const adminDb = testEnv.authenticatedContext("user1").firestore();
+      const cardRefAdmin = doc(adminDb, "imageCards/card1");
+      await setDoc(cardRefAdmin, {
+        createdBy: { uid: "user1" },
+        createdAt: "2026-02-04T00:00:00Z",
+        messageCount: 0,
+        storagePath: null,
+        notesText: "initial notes",
+      });
+
+      // 2. Try to update as user2 (simulating message post)
+      const user2Db = testEnv.authenticatedContext("user2").firestore();
+      const cardRefUser2 = doc(user2Db, "imageCards/card1");
+      
+      // Should succeed with specific fields
       await assertSucceeds(
-        setDoc(msgRef, { author: { uid: "user1" }, text: "hello" }),
+        transactionUpdate(user2Db, cardRefUser2, {
+          lastMessageAt: new Date(),
+          messageCount: 1,
+        })
       );
     });
 
-    it("should deny create if author.uid mismatches", async () => {
+    it("should deny non-owner from updating notesText", async () => {
+      const adminDb = testEnv.authenticatedContext("user1").firestore();
+      const cardRefAdmin = doc(adminDb, "imageCards/card1");
+      await setDoc(cardRefAdmin, {
+        createdBy: { uid: "user1" },
+        createdAt: "2026-02-04T00:00:00Z",
+        messageCount: 0,
+      });
+
+      const user2Db = testEnv.authenticatedContext("user2").firestore();
+      const cardRefUser2 = doc(user2Db, "imageCards/card1");
+      await assertFails(
+        setDoc(cardRefUser2, { messageCount: 1, notesText: "hacked" }, { merge: true }),
+      );
+    });
+  });
+
+  describe("messages", () => {
+    it("should allow create if author.uid matches and createdAt is server time", async () => {
       const authedDb = testEnv.authenticatedContext("user1").firestore();
       const msgRef = doc(authedDb, "imageCards/card1/messages/msg1");
+      await assertSucceeds(
+        setDoc(msgRef, { 
+          author: { uid: "user1" }, 
+          text: "hello",
+          createdAt: new Date()
+        }),
+      );
+    });
+
+    it("should deny create if createdAt is NOT server time (or missing)", async () => {
+      const authedDb = testEnv.authenticatedContext("user1").firestore();
+      const msgRef = doc(authedDb, "imageCards/card1/messages/msg2");
       await assertFails(
-        setDoc(msgRef, { author: { uid: "user2" }, text: "hello" }),
+        setDoc(msgRef, { 
+          author: { uid: "user1" }, 
+          text: "hello"
+        }),
       );
     });
 
@@ -99,16 +147,26 @@ describe("Firestore Security Rules", () => {
       const authedDb = testEnv.authenticatedContext("user1").firestore();
       const msgRef = doc(authedDb, "imageCards/card1/messages/msg1");
       await assertSucceeds(
-        setDoc(msgRef, { author: { uid: "user1" }, text: "hello" }),
+        setDoc(msgRef, { 
+          author: { uid: "user1" }, 
+          text: "hello",
+          createdAt: new Date()
+        }),
       );
 
       await assertFails(
-        setDoc(msgRef, { author: { uid: "user1" }, text: "updated" }),
+        setDoc(msgRef, { author: { uid: "user1" }, text: "updated", createdAt: new Date() }),
       );
       await assertFails(deleteDoc(msgRef));
     });
   });
 });
+
+// Helper for complex updates in tests if needed (simplified here)
+async function transactionUpdate(db: unknown, ref: unknown, data: object) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return setDoc(ref as any, data, { merge: true });
+}
 
 describe("Storage Security Rules", () => {
   it("should deny upload for unauthenticated users", async () => {

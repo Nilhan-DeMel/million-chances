@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Sparkles, 
@@ -28,7 +29,7 @@ import {
 } from "lucide-react";
 import { useState, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { SmartImage } from "@/components/ui/SmartImage";
 import { ImageCard } from "@/lib/firestore/imageCards";
 
 export default function GalleryPage() {
@@ -70,8 +71,18 @@ function GalleryContent() {
   ) || [];
 
   const handleCreateStub = () => {
+    console.log("handleCreateStub called", { user, isPending: createStubMutation.isPending });
     if (user) {
-      createStubMutation.mutate(user);
+      createStubMutation.mutate(user, {
+        onError: (error) => {
+          console.error("Failed to create stub:", error);
+        },
+        onSuccess: (cardId) => {
+          console.log("Successfully created card:", cardId);
+        }
+      });
+    } else {
+      console.error("No user found");
     }
   };
 
@@ -168,6 +179,7 @@ function GalleryContent() {
 
 function GalleryCard({ card, index }: { card: ImageCard; index: number }) {
   const { user } = useAuth();
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   
@@ -192,6 +204,10 @@ function GalleryCard({ card, index }: { card: ImageCard; index: number }) {
     }
   };
 
+  const handleCardClick = () => {
+    router.push(`/cards/${card.id}`);
+  };
+
   return (
     <motion.div
       layout
@@ -199,8 +215,12 @@ function GalleryCard({ card, index }: { card: ImageCard; index: number }) {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.2, delay: index * 0.05 }}
+      onClick={handleCardClick}
+      className="cursor-pointer"
     >
-      <Card className="group overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow bg-white flex flex-col h-full">
+      <Card 
+        className="group overflow-hidden border-none shadow-sm hover:shadow-md transition-all bg-white flex flex-col h-full active:scale-[0.98]"
+      >
         <div className="aspect-video bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors relative overflow-hidden">
           {card.storagePath ? (
             <>
@@ -212,7 +232,7 @@ function GalleryCard({ card, index }: { card: ImageCard; index: number }) {
                   animate={{ opacity: 1 }}
                   className="relative w-full h-full"
                 >
-                  <Image
+                  <SmartImage
                     src={imageUrl}
                     alt={card.notesText || "Image card"}
                     fill
@@ -237,7 +257,10 @@ function GalleryCard({ card, index }: { card: ImageCard; index: number }) {
                     variant="secondary" 
                     size="sm"
                     className="bg-white/90 hover:bg-white text-indigo-600 border border-indigo-100"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      fileInputRef.current?.click();
+                    }}
                     disabled={uploadMutation.isPending}
                   >
                     <Upload className="h-3.5 w-3.5 mr-2" />
@@ -259,7 +282,7 @@ function GalleryCard({ card, index }: { card: ImageCard; index: number }) {
             {card.storagePath ? "IMAGE" : "STUB"}
           </div>
         </div>
-        <CardHeader className="p-4 flex-grow">
+        <CardHeader className="p-4 grow">
           <div className="space-y-1">
             <p className="font-medium line-clamp-1">
               {card.notesText || "No notes yet"}

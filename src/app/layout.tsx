@@ -3,6 +3,10 @@ import { Outfit, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { EnvBanner } from "@/components/debug/EnvBanner";
+import { logEnvironmentStatus } from "@/lib/firebase/env-logger";
+
+// Chunk B: Server-side log on startup
+logEnvironmentStatus();
 
 const outfit = Outfit({
   variable: "--font-outfit",
