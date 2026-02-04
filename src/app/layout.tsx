@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     siteName: "Million Chances",
     images: [
       {
-        url: "/opengraph-image.png",
+        url: "/opengraph-image.webp?v=1",
         width: 1200,
         height: 630,
         alt: "Million Chances Preview",
