@@ -4,7 +4,13 @@ import {
   initializeTestEnvironment,
   RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  deleteDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import {
   ref,
   uploadBytes,
@@ -127,7 +133,7 @@ describe("Firestore Security Rules", () => {
         setDoc(msgRef, { 
           author: { uid: "user1" }, 
           text: "hello",
-          createdAt: new Date()
+          createdAt: serverTimestamp()
         }),
       );
     });
@@ -150,7 +156,7 @@ describe("Firestore Security Rules", () => {
         setDoc(msgRef, { 
           author: { uid: "user1" }, 
           text: "hello",
-          createdAt: new Date()
+          createdAt: serverTimestamp()
         }),
       );
 
