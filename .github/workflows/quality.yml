@@ -1,0 +1,30 @@
+name: Next.js Quality
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_FIREBASE_API_KEY: portfolio-build-placeholder
+      NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: portfolio-build.example.test
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: portfolio-build
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: portfolio-build.example.test
+      NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "000000000000"
+      NEXT_PUBLIC_FIREBASE_APP_ID: "1:000000000000:web:portfolio"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+

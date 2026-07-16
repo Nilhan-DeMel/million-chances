@@ -1,5 +1,10 @@
 # Million Chances
 
+<!-- portfolio-flagship -->
+<p align="center"><img src="docs/social-preview.png" alt="Million Chances social preview" width="100%"></p>
+
+> **Portfolio review path:** Start with the capabilities and architecture below, then reproduce the documented verification commands. See [SECURITY.md](SECURITY.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [RIGHTS.md](RIGHTS.md) for the project's operating and reuse boundaries.
+
 An authenticated, image-centered work-memory prototype built with Next.js and Firebase.
 
 Million Chances explores a simple idea: a work memory becomes easier to revisit when its image, notes, and discussion live together as one durable card. Users authenticate, create image-card stubs, upload media with progress feedback, search the gallery, edit owner-controlled notes, and continue a real-time message thread around each card.
